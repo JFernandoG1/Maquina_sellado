@@ -20,11 +20,12 @@ namespace WindowsFormsApp1
         public ActUtlType plc = new ActUtlType();
         int Longitud_bolsa_default;
         int calibrate = 0;
-        int tiempo;
+        int tiempo, tiempo_inflado;
         int resultCode=1;
         int resultados2;
         int bagsizeread, bagsizeread1;
-        string bagsizeSetting,tiemposelladoSetting,longitudretornoSetting;
+        int error = 0;
+        string bagsizeSetting,tiemposelladoSetting,longitudretornoSetting,tiempoinfladoSetting;
 
 
         public Form1()
@@ -35,6 +36,37 @@ namespace WindowsFormsApp1
             this.Text = "Maquina empacadora Version Beta";
             this.BackColor = Color.LightGray;
             conexion_status.BackColor = Color.Red; // Enciende el indicador
+            label9.Text = "";
+
+            // Define los puntos para la flecha hacia arriba
+            Point[] pointsUp =
+            {
+        new Point(button12.Width / 2, 0),
+        new Point(button12.Width, button12.Height),
+        new Point(0, button12.Height)
+    };
+
+            // Crea un nuevo gráfico de trazado para el botón 12
+            System.Drawing.Drawing2D.GraphicsPath buttonPathUp = new System.Drawing.Drawing2D.GraphicsPath();
+            buttonPathUp.AddPolygon(pointsUp);
+
+            // Usa el trazado para definir la Región del botón
+            button12.Region = new System.Drawing.Region(buttonPathUp);
+
+            // Define los puntos para la flecha hacia abajo
+            Point[] pointsDown =
+            {
+        new Point(0, 0),
+        new Point(button13.Width, 0),
+        new Point(button13.Width / 2, button13.Height)
+    };
+
+            // Crea un nuevo gráfico de trazado para el botón 13
+            System.Drawing.Drawing2D.GraphicsPath buttonPathDown = new System.Drawing.Drawing2D.GraphicsPath();
+            buttonPathDown.AddPolygon(pointsDown);
+
+            // Usa el trazado para definir la Región del botón
+            button13.Region = new System.Drawing.Region(buttonPathDown);
 
         }
 
@@ -66,11 +98,11 @@ namespace WindowsFormsApp1
             if (resultCode == 0) {
                 int read_results;
                 double value = Convert.ToDouble(textBox2.Text);
-                double result = value * 31.23;
+                double result = (value * 31.23)+2000;
                 plc.SetDevice("D10", Convert.ToInt16(result));
                 plc.GetDevice("D10", out read_results);
                 textBox2.Text = "";
-                bagsizeread = (int)Math.Round(read_results / 31.23);
+                bagsizeread = (int)Math.Round((read_results-2000) / 31.23);
                 label3.Text = bagsizeread.ToString();
                 SavebagsizeSettings();
             }
@@ -93,22 +125,61 @@ namespace WindowsFormsApp1
             bagsizeSetting = ConfigurationManager.AppSettings["bag_sizeSetting"];
             tiemposelladoSetting = ConfigurationManager.AppSettings["tiemposelladoSetting"];
             longitudretornoSetting = ConfigurationManager.AppSettings["longitudretornoSetting"];
-
+            tiempoinfladoSetting = ConfigurationManager.AppSettings["tiempoinfladoSetting"];
             if (resultCode == 0) // 0 means the connection was successful
             {
                 label2.Text = ("Conectado");
+                plc.SetDevice("M32", 0);
+                int safety_light;
+                int emergency_button;
+                int sensor_sello;
+                int boton_derecho;
+                int sensor_falta_bolsa;
+                error = 0;
+                plc.GetDevice("X1", out safety_light);
+                if(safety_light == 0)
+                {
+                    label2.Text = ("Error en Barras de seguridad");
+                    error = 1;
+                }
+                plc.GetDevice("X3", out sensor_falta_bolsa);
+                if (sensor_falta_bolsa == 0)
+                {
+                    label2.Text = ("Error en sensor bolsa trasero");
+                    error = 1;
+                }
+                plc.GetDevice("X4", out emergency_button);
+                if (emergency_button == 0)
+                {
+                    label2.Text = ("Error en Boton de emergencia");
+                    error = 1;
+                }
+                plc.GetDevice("X5", out sensor_sello);
+                if (sensor_sello == 1)
+                {
+                    label2.Text = ("Error en sensor final de carrera sello");
+                    error = 1;
+                }
+                plc.GetDevice("X6", out boton_derecho);
+                if (boton_derecho == 1)
+                {
+                    label2.Text = ("Error en boton derecho");
+                    error = 1;
+                }
+
                 ////////Cambia el valor de la bolsa del archivo config de los registros del plc
                 int read_results1;
-                double result1 = Convert.ToDouble(bagsizeSetting) * 31.23;
+                double result1 = (Convert.ToDouble(bagsizeSetting) * 31.23)+2000;
                 plc.SetDevice("D10", Convert.ToInt16(result1));
                 plc.GetDevice("D10", out read_results1);
-                bagsizeread1 = (int)Math.Round(read_results1 / 31.23);
+                bagsizeread1 = (int)Math.Round((read_results1-2000) / 31.23);
                 label3.Text = bagsizeread1.ToString();
 
                 int read_results2=Convert.ToInt16(tiemposelladoSetting);
                 plc.SetDevice("D11", read_results2);
                 plc.GetDevice("D11", out tiempo);
                 label5.Text = tiempo.ToString();
+
 
                 int read_results3;
                 double value2 = Convert.ToDouble(longitudretornoSetting);
@@ -122,8 +193,19 @@ namespace WindowsFormsApp1
                 label7.Text = resultados2.ToString();
 
 
+                int read_results4 = Convert.ToInt16(tiempoinfladoSetting);
+                plc.SetDevice("D17", read_results4);
+                plc.GetDevice("D17", out tiempo_inflado);
+                label10.Text = tiempo_inflado.ToString();
                 conexion_status.BackColor= Color.Green; // Enciende el indicador
-                                                      
+                plc.SetDevice("M29", 1);
+                label12.Text = "Impresión Encendida";
+                if (error == 1)
+                {
+                    resultCode = 1;
+                    plc.Close();
+                    conexion_status.BackColor = Color.Red; // Enciende el indicador
+                }
 
             }
             else
@@ -155,7 +237,7 @@ namespace WindowsFormsApp1
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (resultCode == 0)
+            if ((resultCode == 0) && (error == 0))
             {
                 int machine_status;
                 plc.GetDevice("M20", out machine_status);
@@ -163,21 +245,10 @@ namespace WindowsFormsApp1
                 {
                     if (calibrate == 1)
                     {
-                        int read_results;
-                        plc.SetDevice("M20", 1);
-                        plc.SetDevice("M16", 1);
-                        Thread.Sleep(500);
-                        plc.SetDevice("M15", 1);
-                        Thread.Sleep(200);
-                        plc.SetDevice("M15", 0);
-                        plc.GetDevice("D10", out read_results);
-                        read_results = read_results + 3500;
-                        plc.SetDevice("D10", Convert.ToInt16(read_results));
-                        plc.SetDevice("M21", 1);
-                        Thread.Sleep(3000);
-                        plc.SetDevice("M21", 0);
-                        read_results = read_results - 3500;
-                        plc.SetDevice("D10", Convert.ToInt16(read_results));
+                    
+                        plc.SetDevice("M20", 1);//Inicia la maquina
+                        plc.SetDevice("M24", 1);//Inicia la impresion
+
                         label2.Text = ("Iniciado");
                     }
                     else
@@ -201,6 +272,7 @@ namespace WindowsFormsApp1
             {
                 plc.SetDevice("M20", 0);
                 calibrate = 0;
+                plc.SetDevice("M24", 0);//detiene la impresion
                 label2.Text = ("Detenido");
             }
             else {label2.Text = ("Conecta la maquina primero"); }
@@ -213,10 +285,67 @@ namespace WindowsFormsApp1
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if (resultCode == 0)
+            if ((resultCode == 0)&&(error==0))
             {
                 if (calibrate == 0)
                 {
+                    int sensor_bolsa;
+                    plc.GetDevice("M23", out sensor_bolsa);
+                    if (sensor_bolsa == 0)
+                    {
+                        //label2.Text = ("No hay bolsa");
+                        plc.SetDevice("M3", 1);
+                        Thread.Sleep(1000);
+                        plc.GetDevice("M23", out sensor_bolsa);
+                        if (sensor_bolsa == 1)
+                        {
+                            plc.SetDevice("M22", 1);
+                            Thread.Sleep(500);
+                            plc.SetDevice("M22", 0);
+                            int estado_de_calibracion = 1;
+                            while (estado_de_calibracion == 1)
+                            {
+                                plc.GetDevice("M23", out estado_de_calibracion);
+                                if (estado_de_calibracion == 0)
+                                {
+                                    calibrate = 1;
+                                    label2.Text = ("Listo para iniciar");
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            plc.SetDevice("M3", 1);
+                            Thread.Sleep(1000);
+                            plc.GetDevice("M23", out sensor_bolsa);
+                            if (sensor_bolsa == 1)
+                            {
+                                plc.SetDevice("M22", 1);
+                                Thread.Sleep(500);
+                                plc.SetDevice("M22", 0);
+                                int estado_de_calibracion = 1;
+                                while (estado_de_calibracion == 1)
+                                {
+                                    plc.GetDevice("M23", out estado_de_calibracion);
+                                    if (estado_de_calibracion == 0)
+                                    {
+                                        calibrate = 1;
+                                        label2.Text = ("Listo para iniciar");
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                label2.Text = ("No hay bolsa");
+
+                            }
+                        }
+
+
+                    }
+                    else { 
                     plc.SetDevice("M22", 1);
                     Thread.Sleep(500);
                     plc.SetDevice("M22", 0);
@@ -229,12 +358,13 @@ namespace WindowsFormsApp1
                             calibrate = 1;
                             label2.Text = ("Listo para iniciar");
                         }
+                       }
                     }
                 }
-                else
-                {
-                    label2.Text = ("Deten la maquina primero");
-                }
+            else
+            {
+                label2.Text = ("Deten la maquina primero");
+            }
             }
             else
             {
@@ -251,15 +381,21 @@ namespace WindowsFormsApp1
         {
             if (resultCode == 0)
             {
-                if (tiempo == 2)
+                if (tiempo == 3)
                 {
-                    plc.SetDevice("D11", 3);
+                    plc.SetDevice("D11", 4);
                     plc.GetDevice("D11", out tiempo);
                     SavetiemposelladoSettings();
                 }
-                else if (tiempo == 3)
+                else if (tiempo == 4)
                 {
-                    plc.SetDevice("D11", 2);
+                    plc.SetDevice("D11", 5);
+                    plc.GetDevice("D11", out tiempo);
+                    SavetiemposelladoSettings();
+                }
+                else if (tiempo == 5)
+                {
+                    plc.SetDevice("D11", 3);
                     plc.GetDevice("D11", out tiempo);
                     SavetiemposelladoSettings();
                 }
@@ -302,16 +438,25 @@ namespace WindowsFormsApp1
             {
                 int read_results2;
                 double value2 = Convert.ToDouble(textBox1.Text);
-                double result2 = value2 * 31.23;
-                double result2neg = result2 * (-1);
-                plc.SetDevice("D15", Convert.ToInt16(result2neg));
-                plc.SetDevice("D16", Convert.ToInt16(result2));
-                plc.GetDevice("D16", out read_results2);
+                if ((value2 >= 0) && (value2 <= 40))
+                {
+                    label9.Text = "";
+                   
+                   double result2 = value2 * 31.23;
+                    double result2neg = result2 * (-1);
+                    plc.SetDevice("D15", Convert.ToInt16(result2neg));
+                    plc.SetDevice("D16", Convert.ToInt16(result2));
+                    plc.GetDevice("D16", out read_results2);
 
-                textBox1.Text = "";
-                resultados2 = (int)Math.Round(read_results2 / 31.23);
-                label7.Text = resultados2.ToString();
-                SavelongitudretornoSettings();
+                    textBox1.Text = "";
+                    resultados2 = (int)Math.Round(read_results2 / 31.23);
+                    label7.Text = resultados2.ToString();
+                    SavelongitudretornoSettings();
+                }
+                else
+                {
+                    label9.Text = ("Ingresa un numero entre 0 y 40");
+                }
             }
             else { label2.Text = ("Conecta la maquina primero"); }
         }
@@ -320,6 +465,102 @@ namespace WindowsFormsApp1
         {
 
         }
+
+        private void label11_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label12_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            if (resultCode == 0)
+            {
+                plc.SetDevice("M29", 0);
+                plc.SetDevice("D16", 0);
+                plc.SetDevice("D15", 0);
+                label12.Text = "Impresión Apagada";
+                label7.Text = "";
+            }
+            else
+            {
+                label2.Text = ("Conecta la maquina primero");
+            }
+
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            if (resultCode == 0)
+            {
+                plc.SetDevice("M29", 1);
+                int read_results3;
+                longitudretornoSetting = ConfigurationManager.AppSettings["longitudretornoSetting"];
+                double value2 = Convert.ToDouble(longitudretornoSetting);
+                double result2 = value2 * 31.23;
+                double result2neg = result2 * (-1);
+                plc.SetDevice("D15", Convert.ToInt16(result2neg));
+                plc.SetDevice("D16", Convert.ToInt16(result2));
+                plc.GetDevice("D16", out read_results3);
+
+                resultados2 = (int)Math.Round(read_results3 / 31.23);
+                label7.Text = resultados2.ToString();
+                label12.Text = "Impresión Encendida";
+            }
+            else
+            {
+                label2.Text = ("Conecta la maquina primero");
+            }
+
+        }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+
+
+        }
+
+        private void button12_Click(object sender, EventArgs e)
+        {
+            plc.SetDevice("M12", 1);
+            //Console.WriteLine("Subiendo bolsa");
+        }
+
+        private void button13_Click(object sender, EventArgs e)
+        {
+            plc.SetDevice("M13", 1);
+            //Console.WriteLine("Bajando bolsa");
+        }
+
+        private void button9_Click_1(object sender, EventArgs e)
+        {
+            if (resultCode == 0)
+            {
+                if (tiempo_inflado == 10)
+                {
+                    plc.SetDevice("D17", 20);
+                    plc.GetDevice("D17", out tiempo_inflado);
+                    SavetiempoinfladoSettings();
+                }
+                else if (tiempo_inflado == 20)
+                {
+                    plc.SetDevice("D17", 10);
+                    plc.GetDevice("D17", out tiempo_inflado);
+                    SavetiemposelladoSettings();
+                }
+
+                label10.Text = tiempo_inflado.ToString();
+            }
+            else
+            {
+                label2.Text = ("Conecta la maquina primero");
+            }
+        }
+
         private void SavebagsizeSettings()
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -331,6 +572,13 @@ namespace WindowsFormsApp1
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings["tiemposelladoSetting"].Value = tiempo.ToString();
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
+        }
+        private void SavetiempoinfladoSettings()
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            config.AppSettings.Settings["tiempoinfladoSetting"].Value = tiempo_inflado.ToString();
             config.Save(ConfigurationSaveMode.Modified);
             ConfigurationManager.RefreshSection("appSettings");
         }
