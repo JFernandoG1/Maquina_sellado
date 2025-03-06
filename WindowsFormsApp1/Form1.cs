@@ -395,6 +395,24 @@ namespace WindowsFormsApp1
                 }
                 else if (tiempo == 5)
                 {
+                    plc.SetDevice("D11", 6);
+                    plc.GetDevice("D11", out tiempo);
+                    SavetiemposelladoSettings();
+                }
+                else if (tiempo == 6)
+                {
+                    plc.SetDevice("D11", 7);
+                    plc.GetDevice("D11", out tiempo);
+                    SavetiemposelladoSettings();
+                }
+                else if (tiempo == 7)
+                {
+                    plc.SetDevice("D11", 8);
+                    plc.GetDevice("D11", out tiempo);
+                    SavetiemposelladoSettings();
+                }
+                else if (tiempo == 8)
+                {
                     plc.SetDevice("D11", 3);
                     plc.GetDevice("D11", out tiempo);
                     SavetiemposelladoSettings();
