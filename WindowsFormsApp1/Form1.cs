@@ -25,6 +25,9 @@ namespace WindowsFormsApp1
         int resultados2;
         int bagsizeread, bagsizeread1;
         int error = 0;
+        // Variable global para almacenar el tamaño en mm
+        private int tamañoBolsaMM = 0;
+        int bolsa;
         string bagsizeSetting,tiemposelladoSetting,longitudretornoSetting,tiempoinfladoSetting;
 
 
@@ -92,22 +95,55 @@ namespace WindowsFormsApp1
         {
 
         }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) // Botón Cambiar tamaño de bolsa
         {
-            if (resultCode == 0) {
-                int read_results;
-                double value = Convert.ToDouble(textBox2.Text);
-                double result = (value * 31.23)+2000;
-                plc.SetDevice("D10", Convert.ToInt16(result));
-                plc.GetDevice("D10", out read_results);
-                textBox2.Text = "";
-                bagsizeread = (int)Math.Round((read_results-2000) / 31.23);
-                label3.Text = bagsizeread.ToString();
-                SavebagsizeSettings();
+            resultCode = 0;
+            if (resultCode == 0)
+            {
+                // Validar entrada
+                if (!double.TryParse(textBox2.Text, out double value))
+                {
+                    label2.Text = "Ingrese un número válido.";
+                    return;
+                }
+
+                // Calcular resultado
+                double result = (value * 31.23) + 2000;
+
+                // Validar límites de Int16
+                if (result > short.MaxValue || result < short.MinValue)
+                {
+                    label2.Text = "El valor calculado está fuera del rango permitido.";
+                    return;
+                }
+
+                try
+                {
+                    // Escribir y leer del PLC
+                    plc.SetDevice("D10", Convert.ToInt16(result));
+                    plc.GetDevice("D10", out int read_results);
+
+                    // Calcular tamaño de la bolsa
+                    bagsizeread = (int)Math.Round((read_results - 2000) / 31.23);
+                    label3.Text = bagsizeread.ToString();
+
+                    // Guardar configuración
+                    SavebagsizeSettings();
+
+                    // Limpiar entrada
+                    textBox2.Text = "";
+                }
+                catch (Exception ex)
+                {
+                    label2.Text = "Error de comunicación con el PLC: " + ex.Message;
+                }
             }
-            else {label2.Text = ("Conecta la maquina primero"); }
+            else
+            {
+                label2.Text = "Conecta la máquina primero.";
+            }
         }
+
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -177,6 +213,7 @@ namespace WindowsFormsApp1
 
                 int read_results2=Convert.ToInt16(tiemposelladoSetting);
                 plc.SetDevice("D11", read_results2);
+                plc.SetDevice("D12", read_results2 + 2);
                 plc.GetDevice("D11", out tiempo);
                 label5.Text = tiempo.ToString();
 
@@ -200,6 +237,13 @@ namespace WindowsFormsApp1
                 conexion_status.BackColor= Color.Green; // Enciende el indicador
                 plc.SetDevice("M29", 1);
                 label12.Text = "Impresión Encendida";
+                
+
+                // Leer el valor del PLC
+                plc.GetDevice("D10", out bolsa);
+
+                // Convertir a mm
+                tamañoBolsaMM = (int)Math.Round((bolsa - 2000) / 31.23);
                 if (error == 1)
                 {
                     resultCode = 1;
@@ -248,7 +292,12 @@ namespace WindowsFormsApp1
                     
                         plc.SetDevice("M20", 1);//Inicia la maquina
                         plc.SetDevice("M24", 1);//Inicia la impresion
+                        textBox2.Text = "";
+                        // Leer el valor del PLC
+                        plc.GetDevice("D10", out bolsa);
 
+                        // Convertir a mm
+                        tamañoBolsaMM = (int)Math.Round((bolsa - 2000) / 31.23);
                         label2.Text = ("Iniciado");
                     }
                     else
@@ -290,6 +339,12 @@ namespace WindowsFormsApp1
                 if (calibrate == 0)
                 {
                     int sensor_bolsa;
+                    textBox2.Text = "";
+                    // Leer el valor del PLC
+                    plc.GetDevice("D10", out bolsa);
+
+                    // Convertir a mm
+                    tamañoBolsaMM = (int)Math.Round((bolsa - 2000) / 31.23);
                     plc.GetDevice("M23", out sensor_bolsa);
                     if (sensor_bolsa == 0)
                     {
@@ -381,43 +436,18 @@ namespace WindowsFormsApp1
         {
             if (resultCode == 0)
             {
-                if (tiempo == 3)
+                if (tiempo >= 12 && tiempo <= 18)
                 {
-                    plc.SetDevice("D11", 4);
+                    int nuevoD11 = (tiempo == 18) ? 12 : tiempo + 1;
+                    plc.SetDevice("D11", nuevoD11);
+                    plc.SetDevice("D12", nuevoD11 + 2);
+
                     plc.GetDevice("D11", out tiempo);
                     SavetiemposelladoSettings();
                 }
-                else if (tiempo == 4)
-                {
-                    plc.SetDevice("D11", 5);
-                    plc.GetDevice("D11", out tiempo);
-                    SavetiemposelladoSettings();
-                }
-                else if (tiempo == 5)
-                {
-                    plc.SetDevice("D11", 6);
-                    plc.GetDevice("D11", out tiempo);
-                    SavetiemposelladoSettings();
-                }
-                else if (tiempo == 6)
-                {
-                    plc.SetDevice("D11", 7);
-                    plc.GetDevice("D11", out tiempo);
-                    SavetiemposelladoSettings();
-                }
-                else if (tiempo == 7)
-                {
-                    plc.SetDevice("D11", 8);
-                    plc.GetDevice("D11", out tiempo);
-                    SavetiemposelladoSettings();
-                }
-                else if (tiempo == 8)
-                {
-                    plc.SetDevice("D11", 3);
-                    plc.GetDevice("D11", out tiempo);
-                    SavetiemposelladoSettings();
-                }
+
                 label5.Text = tiempo.ToString();
+
             }
             else
             {
@@ -541,17 +571,29 @@ namespace WindowsFormsApp1
 
 
         }
+        // Método para actualizar el tamaño de la bolsa en la variable y el TextBox
+        private void MoverBolsa(int incrementoMM)
+        {
+            // Actualizar la variable local en mm
+            tamañoBolsaMM += incrementoMM;
 
+            // Mostrar en el TextBox antes de enviarlo al PLC
+            textBox2.Text = tamañoBolsaMM.ToString();
+        }
+        //Boton subir bolsa
         private void button12_Click(object sender, EventArgs e)
         {
             plc.SetDevice("M12", 1);
-            //Console.WriteLine("Subiendo bolsa");
+            MoverBolsa(-5); // Aumenta en 10 mm
+            Console.WriteLine("Subiendo bolsa");
         }
-
+        
+        //Boton bajar bolsa
         private void button13_Click(object sender, EventArgs e)
         {
             plc.SetDevice("M13", 1);
-            //Console.WriteLine("Bajando bolsa");
+            MoverBolsa(5); // Disminuye en 10 mm
+            Console.WriteLine("Bajando bolsa");
         }
 
         private void button9_Click_1(object sender, EventArgs e)
