@@ -166,6 +166,7 @@ namespace WindowsFormsApp1
             {
                 label2.Text = ("Conectado");
                 plc.SetDevice("M32", 0);
+
                 int safety_light;
                 int emergency_button;
                 int sensor_sello;
@@ -235,9 +236,12 @@ namespace WindowsFormsApp1
                 plc.GetDevice("D17", out tiempo_inflado);
                 label10.Text = tiempo_inflado.ToString();
                 conexion_status.BackColor= Color.Green; // Enciende el indicador
-                plc.SetDevice("M29", 1);
-                label12.Text = "Impresión Encendida";
-                
+                plc.SetDevice("M29", 0);
+                plc.SetDevice("D16", 0);
+                plc.SetDevice("D15", 0);
+                label12.Text = "Impresión Apagada";
+                label7.Text = "";
+
 
                 // Leer el valor del PLC
                 plc.GetDevice("D10", out bolsa);
