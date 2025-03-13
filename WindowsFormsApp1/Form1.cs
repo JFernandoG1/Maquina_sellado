@@ -440,9 +440,9 @@ namespace WindowsFormsApp1
         {
             if (resultCode == 0)
             {
-                if (tiempo >= 12 && tiempo <= 18)
+                if (tiempo >= 8 && tiempo <= 14)
                 {
-                    int nuevoD11 = (tiempo == 18) ? 12 : tiempo + 1;
+                    int nuevoD11 = (tiempo == 14) ? 8 : tiempo + 1;
                     plc.SetDevice("D11", nuevoD11);
                     plc.SetDevice("D12", nuevoD11 + 2);
 
@@ -451,6 +451,7 @@ namespace WindowsFormsApp1
                 }
 
                 label5.Text = tiempo.ToString();
+
 
             }
             else
