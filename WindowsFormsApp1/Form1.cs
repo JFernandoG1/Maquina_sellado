@@ -242,6 +242,8 @@ namespace WindowsFormsApp1
                 label12.Text = "Impresión Apagada";
                 label7.Text = "";
 
+                    plc.SetDevice("M41", 1);
+                    label15.Text = "Corte Encendido";
 
                 // Leer el valor del PLC
                 plc.GetDevice("D10", out bolsa);
@@ -599,6 +601,37 @@ namespace WindowsFormsApp1
             plc.SetDevice("M13", 1);
             MoverBolsa(5); // Disminuye en 10 mm
             Console.WriteLine("Bajando bolsa");
+        }
+
+        private void label15_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button14_Click(object sender, EventArgs e)
+        {
+            if (resultCode == 0)
+            {
+                plc.SetDevice("M41", 0);
+                label15.Text = "Corte Apagado";
+                }
+            else
+            {
+                label2.Text = ("Conecta la maquina primero");
+            }
+        }
+
+        private void button15_Click(object sender, EventArgs e)
+        {
+            if (resultCode == 0)
+            {
+                plc.SetDevice("M41", 1);
+                label15.Text = "Corte Encendido";
+            }
+            else
+            {
+                label2.Text = ("Conecta la maquina primero");
+            }
         }
 
         private void button9_Click_1(object sender, EventArgs e)

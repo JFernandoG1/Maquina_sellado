@@ -58,6 +58,9 @@
             this.button13 = new System.Windows.Forms.Button();
             this.label13 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
+            this.label15 = new System.Windows.Forms.Label();
+            this.button14 = new System.Windows.Forms.Button();
+            this.button15 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.conexion_status)).BeginInit();
             this.SuspendLayout();
             // 
@@ -296,7 +299,7 @@
             // 
             // button10
             // 
-            this.button10.Location = new System.Drawing.Point(735, 672);
+            this.button10.Location = new System.Drawing.Point(765, 698);
             this.button10.Name = "button10";
             this.button10.Size = new System.Drawing.Size(155, 50);
             this.button10.TabIndex = 28;
@@ -308,7 +311,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(706, 627);
+            this.label12.Location = new System.Drawing.Point(736, 653);
             this.label12.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(120, 29);
@@ -318,7 +321,7 @@
             // 
             // button11
             // 
-            this.button11.Location = new System.Drawing.Point(909, 672);
+            this.button11.Location = new System.Drawing.Point(939, 698);
             this.button11.Name = "button11";
             this.button11.Size = new System.Drawing.Size(155, 50);
             this.button11.TabIndex = 29;
@@ -329,7 +332,7 @@
             // button12
             // 
             this.button12.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.button12.Location = new System.Drawing.Point(267, 473);
+            this.button12.Location = new System.Drawing.Point(258, 431);
             this.button12.Name = "button12";
             this.button12.Size = new System.Drawing.Size(76, 62);
             this.button12.TabIndex = 30;
@@ -339,7 +342,7 @@
             // button13
             // 
             this.button13.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.button13.Location = new System.Drawing.Point(267, 560);
+            this.button13.Location = new System.Drawing.Point(258, 518);
             this.button13.Name = "button13";
             this.button13.Size = new System.Drawing.Size(76, 61);
             this.button13.TabIndex = 31;
@@ -350,7 +353,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.Location = new System.Drawing.Point(371, 492);
+            this.label13.Location = new System.Drawing.Point(362, 450);
             this.label13.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(135, 29);
@@ -362,18 +365,53 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(371, 578);
+            this.label14.Location = new System.Drawing.Point(362, 536);
             this.label14.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(134, 29);
             this.label14.TabIndex = 33;
             this.label14.Text = "Bajar bolsa";
             // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(119, 653);
+            this.label15.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(72, 29);
+            this.label15.TabIndex = 34;
+            this.label15.Text = "Corte";
+            this.label15.Click += new System.EventHandler(this.label15_Click);
+            // 
+            // button14
+            // 
+            this.button14.Location = new System.Drawing.Point(124, 708);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(155, 50);
+            this.button14.TabIndex = 35;
+            this.button14.Text = "Apagar";
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
+            // 
+            // button15
+            // 
+            this.button15.Location = new System.Drawing.Point(308, 708);
+            this.button15.Name = "button15";
+            this.button15.Size = new System.Drawing.Size(155, 50);
+            this.button15.TabIndex = 36;
+            this.button15.Text = "Encender";
+            this.button15.UseVisualStyleBackColor = true;
+            this.button15.Click += new System.EventHandler(this.button15_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 29F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1189, 810);
+            this.Controls.Add(this.button15);
+            this.Controls.Add(this.button14);
+            this.Controls.Add(this.label15);
             this.Controls.Add(this.label14);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.button13);
@@ -447,6 +485,9 @@
         private System.Windows.Forms.Button button13;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.Button button15;
     }
 }
 
