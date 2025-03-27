@@ -61,6 +61,7 @@
             this.label15 = new System.Windows.Forms.Label();
             this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
+            this.button16 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.conexion_status)).BeginInit();
             this.SuspendLayout();
             // 
@@ -198,11 +199,11 @@
             // 
             // button7
             // 
-            this.button7.Location = new System.Drawing.Point(848, 228);
+            this.button7.Location = new System.Drawing.Point(831, 228);
             this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(155, 50);
+            this.button7.Size = new System.Drawing.Size(49, 50);
             this.button7.TabIndex = 17;
-            this.button7.Text = "Cambiar";
+            this.button7.Text = "+";
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
@@ -404,11 +405,22 @@
             this.button15.UseVisualStyleBackColor = true;
             this.button15.Click += new System.EventHandler(this.button15_Click);
             // 
+            // button16
+            // 
+            this.button16.Location = new System.Drawing.Point(905, 228);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(44, 50);
+            this.button16.TabIndex = 37;
+            this.button16.Text = "-";
+            this.button16.UseVisualStyleBackColor = true;
+            this.button16.Click += new System.EventHandler(this.button16_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 29F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1189, 810);
+            this.Controls.Add(this.button16);
             this.Controls.Add(this.button15);
             this.Controls.Add(this.button14);
             this.Controls.Add(this.label15);
@@ -488,6 +500,7 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Button button14;
         private System.Windows.Forms.Button button15;
+        private System.Windows.Forms.Button button16;
     }
 }
 

@@ -442,18 +442,24 @@ namespace WindowsFormsApp1
         {
             if (resultCode == 0)
             {
-                if (tiempo >= 8 && tiempo <= 14)
+                // Asegurar que está dentro del rango esperado
+                if (tiempo < 5 || tiempo > 14)
                 {
-                    int nuevoD11 = (tiempo == 14) ? 8 : tiempo + 1;
-                    plc.SetDevice("D11", nuevoD11);
-                    plc.SetDevice("D12", nuevoD11 + 2);
-
-                    plc.GetDevice("D11", out tiempo);
-                    SavetiemposelladoSettings();
+                    tiempo = 5;  // Si está fuera de rango, reiniciarlo a 8
                 }
 
-                label5.Text = tiempo.ToString();
+                // Incrementar y ciclar dentro del rango 8-14
+                int nuevoD11 = (tiempo == 14) ? 5 : tiempo + 1;
 
+                // Escribir valores en el PLC
+                plc.SetDevice("D11", nuevoD11);
+                plc.SetDevice("D12", nuevoD11 + 2);
+                plc.GetDevice("D11", out tiempo);
+                // Actualizar la interfaz gráfica
+                label5.Text = nuevoD11.ToString();
+
+                // Guardar la configuración
+                SavetiemposelladoSettings();
 
             }
             else
@@ -634,24 +640,61 @@ namespace WindowsFormsApp1
             }
         }
 
+        private void button16_Click(object sender, EventArgs e)
+        {
+            if (resultCode == 0)
+            {
+                // Asegurar que está dentro del rango esperado
+                if (tiempo < 5 || tiempo > 14)
+                {
+                    tiempo = 5;  // Si está fuera de rango, reiniciarlo a 8
+                }
+
+                // Incrementar y ciclar dentro del rango 8-14
+                int nuevoD11 = (tiempo == 14) ? 5 : tiempo - 1;
+
+                // Escribir valores en el PLC
+                plc.SetDevice("D11", nuevoD11);
+                plc.SetDevice("D12", nuevoD11 + 2);
+                plc.GetDevice("D11", out tiempo);
+                // Actualizar la interfaz gráfica
+                label5.Text = nuevoD11.ToString();
+
+                // Guardar la configuración
+                SavetiemposelladoSettings();
+
+            }
+            else
+            {
+                label2.Text = ("Conecta la maquina primero");
+            }
+        }
+
         private void button9_Click_1(object sender, EventArgs e)
         {
             if (resultCode == 0)
             {
-                if (tiempo_inflado == 10)
-                {
-                    plc.SetDevice("D17", 20);
-                    plc.GetDevice("D17", out tiempo_inflado);
-                    SavetiempoinfladoSettings();
-                }
-                else if (tiempo_inflado == 20)
+                if (tiempo_inflado == 5)
                 {
                     plc.SetDevice("D17", 10);
                     plc.GetDevice("D17", out tiempo_inflado);
+                    SavetiempoinfladoSettings();
+                }
+                else if (tiempo_inflado == 10)
+                {
+                    plc.SetDevice("D17", 5);
+                    plc.GetDevice("D17", out tiempo_inflado);
                     SavetiemposelladoSettings();
+                }
+                else
+                {
+                    // Si no es 5 ni 10, lo establecemos en 5
+                    plc.SetDevice("D17", 5);
+                    plc.GetDevice("D17", out tiempo_inflado);
                 }
 
                 label10.Text = tiempo_inflado.ToString();
+
             }
             else
             {
